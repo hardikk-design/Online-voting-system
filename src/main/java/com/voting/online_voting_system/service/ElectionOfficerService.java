@@ -1,11 +1,14 @@
 package com.voting.online_voting_system.service;
 
 import com.voting.online_voting_system.entity.ElectionOfficerAssignment;
+import com.voting.online_voting_system.entity.Notification;
 import com.voting.online_voting_system.entity.User;
 import com.voting.online_voting_system.enums.AssignmentStatus;
 import com.voting.online_voting_system.enums.AuditAction;
+import com.voting.online_voting_system.enums.NotificationType;
 import com.voting.online_voting_system.enums.Role;
 import com.voting.online_voting_system.repository.ElectionOfficerAssignmentRepository;
+import com.voting.online_voting_system.repository.NotificationRepository;
 import com.voting.online_voting_system.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +19,18 @@ public class ElectionOfficerService {
 
     private final ElectionOfficerAssignmentRepository assignmentRepository;
     private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
     private final AuditLogService auditLogService;
 
     public ElectionOfficerService(
             ElectionOfficerAssignmentRepository assignmentRepository,
             UserRepository userRepository,
+            NotificationRepository notificationRepository,
             AuditLogService auditLogService
     ) {
         this.assignmentRepository = assignmentRepository;
         this.userRepository = userRepository;
+        this.notificationRepository = notificationRepository;
         this.auditLogService = auditLogService;
     }
 
@@ -93,6 +99,23 @@ public class ElectionOfficerService {
 
         ElectionOfficerAssignment savedAssignment =
                 assignmentRepository.save(assignment);
+
+        // ---------------------------------------------------------
+        // CREATE EO ASSIGNMENT NOTIFICATION
+        // ---------------------------------------------------------
+
+        Notification notification =
+                new Notification();
+
+        notification.setUser(user);
+        notification.setType(NotificationType.EO_ASSIGNED);
+        notification.setMessage(
+                "You have been assigned as an Election Officer."
+        );
+        notification.setRead(false);
+        notification.setCreatedAt(LocalDateTime.now());
+
+        notificationRepository.save(notification);
 
         return savedAssignment;
     }

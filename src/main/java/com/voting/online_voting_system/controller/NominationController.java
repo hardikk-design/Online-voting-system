@@ -41,6 +41,30 @@ public class NominationController {
                     .body(e.getMessage());
         }
     }
+    // Get current user's nomination for an election
+
+    @GetMapping("/my/{electionId}")
+    public ResponseEntity<?> getMyNomination(
+            @PathVariable Long electionId) {
+
+        try {
+
+            return nominationService
+                    .getMyNomination(electionId)
+                    .map(ResponseEntity::ok)
+                    .orElseGet(() ->
+                            ResponseEntity
+                                    .notFound()
+                                    .build()
+                    );
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+        }
+    }
 
     // EO gets pending nominations for an election
 

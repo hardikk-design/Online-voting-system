@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Optional;
 @Service
 public class NominationService {
 
@@ -190,6 +190,35 @@ public class NominationService {
         );
 
         return nominationRepository.save(nomination);
+    }
+    // ------------------------------------------------
+// GET CURRENT USER'S NOMINATION FOR AN ELECTION
+// ------------------------------------------------
+
+    public Optional<Nomination> getMyNomination(
+            Long electionId) {
+
+        // Get currently logged-in user from JWT
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        String email = authentication.getName();
+
+        User user =
+                userRepository.findByEmail(email)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "User not found"
+                                ));
+
+        // Find this user's nomination for this election
+        return nominationRepository
+                .findByUserIdAndElectionId(
+                        user.getId(),
+                        electionId
+                );
     }
 
     // ------------------------------------------------
